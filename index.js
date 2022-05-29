@@ -52,7 +52,7 @@ async function run() {
     ////////////ADD REVIEW/////////////////////////
 
     //////////////////ADD ORDER///////////////////
-    
+
     app.post('/order', async (req, res) => {
       const newItem = req.body;
       // console.log(newItem);
@@ -72,16 +72,25 @@ async function run() {
     ///////////
     app.get('/order', async (req, res) => {
       const buyer = req.query.buyer;
-          console.log(buyer)
-      
-          const query = { buyer : buyer };
-          console.log(query)
-          const result = await orderCollection.find(query).toArray();
-          console.log(result)
-          return res.send(result);
-      
-  })
+      // console.log(buyer)
+
+      const query = { buyer: buyer };
+      // console.log(query)
+      const result = await orderCollection.find(query).toArray();
+      // console.log(result)
+      return res.send(result);
+
+    })
     /////////////////GET BUYER ORDERS////////////////
+
+    ///////////////DELETE AN ORDER////////////////
+    app.delete('/order/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    })
+    ///////////////DELETE AN ORDER////////////////
 
   }
   finally {
