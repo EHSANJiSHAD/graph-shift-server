@@ -33,6 +33,13 @@ async function  run(){
             const result = await graphicsCardCollection.findOne(query);
             res.send(result);
         })
+        /////////////////GET REVIEW///////////////////
+        app.get('/review',async(req,res)=>{
+          const query = {};
+          const result = await reviewCollection.find(query).toArray();
+          res.send(result);
+      })
+        /////////////////GET REVIEW///////////////////
 
         ////////////ADD REVIEW/////////////////////////
         app.post('/review', async (req, res) => {
