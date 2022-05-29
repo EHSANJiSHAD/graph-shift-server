@@ -19,6 +19,7 @@ async function  run(){
     try{
         await client.connect();
         const graphicsCardCollection = client.db('graph_shift').collection('graphicsCard');
+        const reviewCollection = client.db('graph_shift').collection('review');
 
         app.get('/item',async(req,res)=>{
             const query = {};
@@ -32,6 +33,15 @@ async function  run(){
             const result = await graphicsCardCollection.findOne(query);
             res.send(result);
         })
+
+        ////////////ADD REVIEW/////////////////////////
+        app.post('/review', async (req, res) => {
+          const newItem = req.body;
+          // console.log(newItem);
+          const result = await reviewCollection.insertOne(newItem);
+          res.send(result);
+      })
+      ////////////ADD REVIEW/////////////////////////
 
         
     }
