@@ -154,18 +154,27 @@ async function run() {
 
 
 
-    app.put('/newUser/admin/:email', async (req, res) => {
+    app.put('/newUser/admin/:email',verifyJWT, async (req, res) => {
       const email = req.params.email;
-      // const requester = req.decoded.email;
-      // requesterAccount = await newUserCollection.findOne({ email: requester })
-       
-          const filter = { email: email };
+      const requester = req.decoded.email;
+      requesterAccount = await newUserCollection.findOne({ email: requester })
+      if (requesterAccount.role === 'admin'){
+        const filter = { email: email };
           const updatedDoc = {
               $set: { role: 'admin' },
           }
           const result = await newUserCollection.updateOne(filter, updatedDoc);
           res.send(result);
-      
+      }
+          
+  
+
+      app.get('admin/:email',async(req,res)=>{
+        const email = req.params.email;
+        const user = await newUserCollection.findOne({email:email});
+        const isAdmin = user.role === 'admin';
+        res.send({admin:isAdmin})
+    })
 
   })
     ///////////////TOKEN AND ADMIN/////////////////////
