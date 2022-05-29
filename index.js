@@ -21,6 +21,7 @@ async function run() {
     const graphicsCardCollection = client.db('graph_shift').collection('graphicsCard');
     const reviewCollection = client.db('graph_shift').collection('review');
     const orderCollection = client.db('graph_shift').collection('order');
+    const userCollection = client.db('graph_shift').collection('user');
 
     app.get('/item', async (req, res) => {
       const query = {};
@@ -91,6 +92,27 @@ async function run() {
       res.send(result);
     })
     ///////////////DELETE AN ORDER////////////////
+
+    //////////////MY PROFILE//////////////////////
+    app.put('/user/:email', async (req, res) => {
+      const email = req.params.email;
+            // console.log(req.params.email);
+            const updatedUser = req.body;
+            // console.log(updatedUser2);
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    education:updatedUser.education,
+                    location:updatedUser.location,
+                    number:updatedUser.number,
+                    linkedIn:updatedUser.linkedIn,
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+    })
+    //////////////MY PROFILE//////////////////////
 
   }
   finally {
