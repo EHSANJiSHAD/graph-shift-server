@@ -15,20 +15,36 @@ app.use(cors());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vbucp.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-function verifyJWT(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-      return res.status(401).send({ message: 'Unauthorized Access' })
-  }
-  const token = authHeader.split(' ')[1];
+// function verifyJWT(req, res, next) {
+//   const authHeader = req.headers.authorization;
+//   if (!authHeader) {
+//       return res.status(401).send({ message: 'Unauthorized Access' })
+//   }
+//   const token = authHeader.split(' ')[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-      if (err) {
-          return res.status(403).send({ message: 'Forbidden Access' })
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+//       if (err) {
+//           return res.status(403).send({ message: 'Forbidden Access' })
+//       }
+//       req.decoded = decoded;
+//       next();
+//   });
+// }
+
+function verifyJWT(req,res,next){
+    const authHeader =  req.headers.authorization;
+    if(!authHeader){
+      return res.status(401).send({message: 'unauthorized access'})
+    }
+    const token = authHeader.split(' ')[1]
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded) {
+      if(err){
+        return res.status(403).send({message: 'Forbidden access'})
       }
+      
       req.decoded = decoded;
       next();
-  });
+    });
 }
 async function run() {
 
@@ -73,7 +89,7 @@ async function run() {
 
     app.post('/order', async (req, res) => {
       const newItem = req.body;
-      // console.log(newItem);
+      //console.log(newItem);
       const result = await orderCollection.insertOne(newItem);
       res.send(result);
     })
@@ -81,23 +97,24 @@ async function run() {
 
     /////////////////GET BUYER ORDERS////////////////
 
-    ///////////
-    // app.get('/order', async (req, res) => {
-    //   const query = {};
-    //   const result = await orderCollection.find(query).toArray();
-    //   res.send(result);
-    // })
-    ///////////
-    app.get('/order', async (req, res) => {
+    
+    app.get('/order',verifyJWT, async (req, res) => {
       const buyer = req.query.buyer;
-      // console.log(buyer)
+      const decodedEmail = req.decoded.email
+      if(buyer === decodedEmail){
+        //console.log(buyer)
       // const authorization = req.headers.authorization;
-      // console.log(authorization);
+      console.log('header',authorization);
       const query = { buyer: buyer };
-      // console.log(query)
+      //console.log(query)
       const result = await orderCollection.find(query).toArray();
       // console.log(result)
-      return res.send(result);
+       return res.send(result);
+      }
+      else{
+        return res.status(403).res({message: "Forbidden access"})
+      }
+      
 
     })
     /////////////////GET BUYER ORDERS////////////////
@@ -154,7 +171,7 @@ async function run() {
 
 
 
-    app.put('/newUser/admin/:email',verifyJWT, async (req, res) => {
+    app.put('/newUser/admin/:email', async (req, res) => {
       const email = req.params.email;
       const requester = req.decoded.email;
       requesterAccount = await newUserCollection.findOne({ email: requester })
@@ -179,6 +196,7 @@ async function run() {
   })
     ///////////////TOKEN AND ADMIN/////////////////////
 
+  
 
   }
   finally {
